@@ -40,7 +40,7 @@ data class TTSChannel(val guildId: Long, val channelId: Long)
 
 lateinit var openAi: OpenAI
 
-fun main(args: Array<String>) {
+fun main() {
     val discordToken = System.getenv("DISCORD_TOKEN") ?: throw Exception("Cannot start bot without Discord token")
     val openAiToken = System.getenv("OPENAI_TOKEN") ?: throw Exception("Cannot start bot with OpenAI token")
 
@@ -66,12 +66,12 @@ fun main(args: Array<String>) {
 
 class LutrineTTS : ListenerAdapter() {
 
+    private val ttsChannelMap: MutableMap<Long, Long> = mutableMapOf()
+    private val ttsVoiceMap: MutableMap<Long, String> = mutableMapOf()
+
     init {
         loadData()
     }
-
-    private val ttsChannelMap = mutableMapOf<Long, Long>()
-    private val ttsVoiceMap: MutableMap<Long, String> = mutableMapOf()
 
     override fun onGuildReady(event: GuildReadyEvent) {
 
