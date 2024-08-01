@@ -69,6 +69,8 @@ class LutrineTTS : ListenerAdapter() {
     private val ttsChannelMap: MutableMap<Long, Long> = mutableMapOf()
     private val ttsVoiceMap: MutableMap<Long, String> = mutableMapOf()
 
+    private val ttsHandler = TTSHandler()
+
     init {
         loadData()
     }
@@ -91,11 +93,16 @@ class LutrineTTS : ListenerAdapter() {
                     Command.Choice("Shimmer", "Shimmer")
                 )),
 
-            Commands.slash("setchannel", "Sets the TTS channel")
+            Commands.slash("setchannel", "Sets the TTS channel"),
+
+            Commands.slash("stop", "Shuts the bot up")
         ).queue()
     }
 
     override fun onMessageReceived(event: MessageReceivedEvent) {
+
+        if (!event.guild.audioManager.isConnected)
+            return
 
         if (ttsChannelMap[event.guild.idLong]?.equals(event.channel.idLong) != true)
             return
@@ -103,17 +110,10 @@ class LutrineTTS : ListenerAdapter() {
         val content = event.message.contentDisplay
         val voice = ttsVoiceMap[event.member?.user?.idLong] ?: "echo"
 
-        var audio: ByteArray?
+        val audio = getAudioResponse(content, voice)
 
-        if (!event.guild.audioManager.isConnected)
-            return
-
-        runBlocking {
-            audio = getAudioResponse(content, voice)
-        }
         if (audio?.isNotEmpty() == true) {
-            val ttsHandler = event.guild.audioManager.sendingHandler as TTSHandler
-            ttsHandler.queue(audio!!)
+            ttsHandler.queue(audio)
         }
     }
 
@@ -125,6 +125,7 @@ class LutrineTTS : ListenerAdapter() {
             "join" -> joinVoice(event)
             "setchannel" -> setChannel(event)
             "setvoice" -> setVoice(event)
+            "stop" -> clearQueue(event)
             else -> {
                 event.reply("Error: unknown command").setEphemeral(true).queue()
             }
@@ -138,8 +139,7 @@ class LutrineTTS : ListenerAdapter() {
         }
 
         val audioManager = event.guild?.audioManager
-        val handler = TTSHandler()
-        audioManager?.sendingHandler = handler
+        audioManager?.sendingHandler = ttsHandler
         audioManager?.openAudioConnection(event.member?.voiceState?.channel?.asVoiceChannel())
         event.reply("Joined ${event.member?.voiceState?.channel?.name}").setEphemeral(true).queue()
     }
@@ -201,6 +201,11 @@ class LutrineTTS : ListenerAdapter() {
         json = gson.toJson(voiceMapList)
         File("/data/voiceMap.json").writeText(json)
     }
+
+    private fun clearQueue(event: SlashCommandInteractionEvent) {
+        ttsHandler.clearQueue()
+        event.reply("Fine, then.").setEphemeral(true).queue()
+    }
 }
 
 class TTSHandler : AudioSendHandler {
@@ -230,6 +235,8 @@ class TTSHandler : AudioSendHandler {
         }
     }
 
+    fun clearQueue() = queue.clear()
+
     override fun canProvide(): Boolean {
         return !queue.isEmpty()
     }
@@ -239,13 +246,9 @@ class TTSHandler : AudioSendHandler {
         return if (data == null) null else ByteBuffer.wrap(data)
     }
 
-    override fun isOpus(): Boolean {
-        return false
-    }
+    override fun isOpus() = false
 
 }
 
-fun log(message : String) {
-    println("[${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))}] $message")
-}
+fun log(message : String) = println("[${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))}] $message")
 
