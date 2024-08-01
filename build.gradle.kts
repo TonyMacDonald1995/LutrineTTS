@@ -1,5 +1,8 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin("jvm") version "1.9.23"
+    application
 }
 
 group = "com.lutrinecreations"
@@ -25,6 +28,31 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(8)
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.jar {
+    archiveFileName.set("LutrineTTS.jar")
+    manifest {
+        attributes["Main-Class"] = "MainKt"
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    val contents = configurations.runtimeClasspath.get().map {
+        if (it.isDirectory)
+            it
+        else
+            zipTree(it)
+    } + sourceSets.main.get().output
+
+    from(contents)
+}
+
+application {
+    mainClass.set("Main")
 }
