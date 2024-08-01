@@ -40,7 +40,7 @@ tasks.withType<KotlinCompile> {
 tasks.jar {
     archiveFileName.set("LutrineTTS.jar")
     manifest {
-        attributes["Main-Class"] = "MainKt"
+        attributes["Main-Class"] = "com.lutrinecreations.MainKt"
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     val contents = configurations.runtimeClasspath.get().map {
@@ -54,5 +54,5 @@ tasks.jar {
 }
 
 application {
-    mainClass.set("Main")
+    mainClass.set("com.lutrinecreations.Main")
 }
