@@ -1,4 +1,7 @@
-FROM openjdk:11
-ADD https://github.com/TonyMacDonald1995/LutrineTTS/releases/latest/download/LutrineTTS.jar /opt
-WORKDIR /opt
+FROM eclipse-temurin:11-jre-alpine
+
+WORKDIR /app
+
+COPY build/libs/LutrineTTS.jar /app
+
 ENTRYPOINT [ "java", "-jar", "LutrineTTS.jar" ]
