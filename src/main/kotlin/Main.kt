@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.audio.AudioSendHandler
+import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
@@ -69,7 +70,7 @@ class LutrineTTS : ListenerAdapter() {
     private val ttsChannelMap: MutableMap<Long, Long> = mutableMapOf()
     private val ttsVoiceMap: MutableMap<Long, String> = mutableMapOf()
 
-    private val ttsHandler = TTSHandler()
+    private val ttsHandlers: MutableMap<Guild, TTSHandler> = mutableMapOf()
 
     init {
         loadData()
@@ -113,7 +114,7 @@ class LutrineTTS : ListenerAdapter() {
         val audio = getAudioResponse(content, voice)
 
         if (audio?.isNotEmpty() == true) {
-            ttsHandler.queue(audio)
+            ttsHandlers[event.guild]?.queue(audio)
         }
     }
 
@@ -138,8 +139,10 @@ class LutrineTTS : ListenerAdapter() {
             return
         }
 
+        ttsHandlers[event.guild!!] = TTSHandler()
+
         val audioManager = event.guild?.audioManager
-        audioManager?.sendingHandler = ttsHandler
+        audioManager?.sendingHandler = ttsHandlers[event.guild!!]
         audioManager?.openAudioConnection(event.member?.voiceState?.channel?.asVoiceChannel())
         event.reply("Joined ${event.member?.voiceState?.channel?.name}").setEphemeral(true).queue()
     }
@@ -203,7 +206,7 @@ class LutrineTTS : ListenerAdapter() {
     }
 
     private fun clearQueue(event: SlashCommandInteractionEvent) {
-        ttsHandler.clearQueue()
+        ttsHandlers[event.guild!!]?.clearQueue()
         event.reply("Fine, then.").setEphemeral(true).queue()
     }
 }
