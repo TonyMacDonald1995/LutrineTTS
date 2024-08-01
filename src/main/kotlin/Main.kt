@@ -179,14 +179,14 @@ class LutrineTTS : ListenerAdapter() {
         if (channelMapFile.exists()) {
             val json = channelMapFile.readText()
             val channelMapList = gson.fromJson(json, Array<TTSChannel>::class.java)
-            channelMapList.forEach { ttsChannelMap[it.guildId] = it.channelId }
+            channelMapList?.forEach { ttsChannelMap[it.guildId] = it.channelId }
         }
 
         val voiceMapFile = File("/data/voiceMap.json")
         if (voiceMapFile.exists()) {
             val json = voiceMapFile.readText()
             val voiceMapList = gson.fromJson(json, Array<VoiceSetting>::class.java)
-            voiceMapList.forEach { ttsVoiceMap[it.userId] = it.voiceId }
+            voiceMapList?.forEach { ttsVoiceMap[it.userId] = it.voiceId }
         }
     }
 
