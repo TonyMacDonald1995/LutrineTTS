@@ -39,6 +39,8 @@ data class VoiceSetting(val userId: Long, val voiceId: String)
 
 data class TTSChannel(val guildId: Long, val channelId: Long)
 
+data class TTSSpeed(val userId: Long, val speed: Double)
+
 lateinit var openAi: OpenAI
 
 fun main() {
@@ -69,6 +71,7 @@ class LutrineTTS : ListenerAdapter() {
 
     private val ttsChannelMap: MutableMap<Long, Long> = mutableMapOf()
     private val ttsVoiceMap: MutableMap<Long, String> = mutableMapOf()
+    private val ttsSpeedMap: MutableMap<Long, Double> = mutableMapOf()
 
     private val ttsHandlers: MutableMap<Guild, TTSHandler> = mutableMapOf()
 
@@ -96,7 +99,14 @@ class LutrineTTS : ListenerAdapter() {
 
             Commands.slash("setchannel", "Sets the TTS channel"),
 
-            Commands.slash("stop", "Shuts the bot up")
+            Commands.slash("stop", "Shuts the bot up"),
+
+            Commands.slash("setspeed", "Sets the TTS speed")
+                .addOptions(OptionData(OptionType.NUMBER, "speed", "Speed to use", true)
+                    .setMinValue(0.1)
+                    .setMaxValue(10)
+                )
+
         ).queue()
     }
 
@@ -110,8 +120,9 @@ class LutrineTTS : ListenerAdapter() {
 
         val content = event.message.contentDisplay
         val voice = ttsVoiceMap[event.member?.user?.idLong] ?: "echo"
+        val speed = ttsSpeedMap[event.member?.user?.idLong] ?: 1.0
 
-        val audio = getAudioResponse(content, voice)
+        val audio = getAudioResponse(content, voice, speed)
 
         if (audio?.isNotEmpty() == true) {
             ttsHandlers[event.guild]?.queue(audio)
@@ -126,6 +137,7 @@ class LutrineTTS : ListenerAdapter() {
             "join" -> joinVoice(event)
             "setchannel" -> setChannel(event)
             "setvoice" -> setVoice(event)
+            "setspeed" -> setSpeed(event)
             "stop" -> clearQueue(event)
             else -> {
                 event.reply("Error: unknown command").setEphemeral(true).queue()
@@ -159,7 +171,13 @@ class LutrineTTS : ListenerAdapter() {
         saveData()
     }
 
-    private fun getAudioResponse(text: String, voice: String): ByteArray? {
+    private fun setSpeed(event: SlashCommandInteractionEvent) {
+        ttsSpeedMap[event.user.idLong] = event.getOption("speed")?.asDouble ?: 1.0
+        event.reply("Set your TTS speed to ${event.getOption("speed")?.asDouble.toString()}")
+        saveData()
+    }
+
+    private fun getAudioResponse(text: String, voice: String, speed: Double): ByteArray? {
         var audio: ByteArray?
         runBlocking {
             audio = openAi.speech(
@@ -167,7 +185,8 @@ class LutrineTTS : ListenerAdapter() {
                     model = ModelId("tts-1"),
                     input = text,
                     voice = Voice(voice),
-                    responseFormat = SpeechResponseFormat("pcm")
+                    responseFormat = SpeechResponseFormat("pcm"),
+                    speed = speed
                 )
             )
         }
@@ -191,6 +210,13 @@ class LutrineTTS : ListenerAdapter() {
             val voiceMapList = gson.fromJson(json, Array<VoiceSetting>::class.java)
             voiceMapList?.forEach { ttsVoiceMap[it.userId] = it.voiceId }
         }
+
+        val speedMapFile = File("/data/speedMap.json")
+        if (speedMapFile.exists()) {
+            val json = voiceMapFile.readText()
+            val speedMapList = gson.fromJson(json, Array<TTSSpeed>::class.java)
+            speedMapList?.forEach { ttsSpeedMap[it.userId] = it.speed }
+        }
     }
 
     private fun saveData() {
@@ -203,6 +229,10 @@ class LutrineTTS : ListenerAdapter() {
         val voiceMapList = ttsVoiceMap.map { VoiceSetting(it.key, it.value) }
         json = gson.toJson(voiceMapList)
         File("/data/voiceMap.json").writeText(json)
+
+        val speedMapList = ttsSpeedMap.map { TTSSpeed(it.key, it.value) }
+        json = gson.toJson(speedMapList)
+        File("/data/speedMap.json").writeText(json)
     }
 
     private fun clearQueue(event: SlashCommandInteractionEvent) {
