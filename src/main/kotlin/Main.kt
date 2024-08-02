@@ -103,8 +103,8 @@ class LutrineTTS : ListenerAdapter() {
 
             Commands.slash("setspeed", "Sets the TTS speed")
                 .addOptions(OptionData(OptionType.NUMBER, "speed", "Speed to use", true)
-                    .setMinValue(0.1)
-                    .setMaxValue(10)
+                    .setMinValue(0.25)
+                    .setMaxValue(4)
                 )
 
         ).queue()
@@ -173,7 +173,7 @@ class LutrineTTS : ListenerAdapter() {
 
     private fun setSpeed(event: SlashCommandInteractionEvent) {
         ttsSpeedMap[event.user.idLong] = event.getOption("speed")?.asDouble ?: 1.0
-        event.reply("Set your TTS speed to ${event.getOption("speed")?.asDouble.toString()}")
+        event.reply("Set your TTS speed to ${event.getOption("speed")?.asDouble.toString()}").setEphemeral(true).queue()
         saveData()
     }
 
