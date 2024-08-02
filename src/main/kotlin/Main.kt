@@ -78,7 +78,7 @@ class LutrineTTS : ListenerAdapter() {
     private val stopPermittedUsers = mutableListOf<Long>(
         1169172527516500010,    // King of the Server
         281251890203852801,     // Fred
-        //211957862786662410,     // Adam
+        211957862786662410,     // Adam
         1057950952067448832,    // Miki
         295059292258828289,     // Tony
         132214703115075585,     // Dylan
@@ -131,7 +131,9 @@ class LutrineTTS : ListenerAdapter() {
 
         val content = event.message.contentDisplay
         val voice = ttsVoiceMap[event.member?.user?.idLong] ?: "echo"
-        val speed = ttsSpeedMap[event.member?.user?.idLong] ?: 1.0
+        var speed = ttsSpeedMap[event.member?.user?.idLong] ?: 1.0
+        if (speed > 4.0 || speed < 0.25)
+            speed = 1.0
 
         val audio = getAudioResponse(content, voice, speed)
 
