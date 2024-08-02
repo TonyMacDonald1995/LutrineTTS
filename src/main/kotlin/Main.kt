@@ -14,6 +14,7 @@ import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.audio.AudioSendHandler
 import net.dv8tion.jda.api.entities.Guild
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent
+import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
@@ -24,6 +25,7 @@ import net.dv8tion.jda.api.interactions.commands.build.OptionData
 import net.dv8tion.jda.api.requests.GatewayIntent
 import net.dv8tion.jda.api.utils.ChunkingFilter
 import net.dv8tion.jda.api.utils.MemberCachePolicy
+import net.dv8tion.jda.api.utils.cache.CacheFlag
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.nio.ByteBuffer
@@ -58,11 +60,12 @@ fun main() {
 
     JDABuilder
         .createDefault(discordToken)
-        .enableIntents(GatewayIntent.GUILD_MEMBERS,GatewayIntent.MESSAGE_CONTENT)
+        .enableIntents(GatewayIntent.GUILD_MEMBERS,GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_VOICE_STATES)
         .setMemberCachePolicy(MemberCachePolicy.ALL)
         .setChunkingFilter(ChunkingFilter.ALL)
         .addEventListeners(lutrineTTS)
         .setStatus(OnlineStatus.ONLINE)
+        .enableCache(CacheFlag.VOICE_STATE)
         .build()
 
 }
@@ -75,7 +78,7 @@ class LutrineTTS : ListenerAdapter() {
 
     private val ttsHandlers: MutableMap<Guild, TTSHandler> = mutableMapOf()
 
-    private val stopPermittedUsers = mutableListOf<Long>(
+    private val stopPermittedUsers = mutableListOf(
         1169172527516500010,    // King of the Server
         281251890203852801,     // Fred
         211957862786662410,     // Adam
@@ -139,6 +142,12 @@ class LutrineTTS : ListenerAdapter() {
 
         if (audio?.isNotEmpty() == true) {
             ttsHandlers[event.guild]?.queue(audio)
+        }
+    }
+
+    override fun onGuildVoiceUpdate(event: GuildVoiceUpdateEvent) {
+        if (event.guild.audioManager.connectedChannel?.asVoiceChannel()?.members?.size == 1) {
+            event.guild.audioManager.closeAudioConnection()
         }
     }
 
