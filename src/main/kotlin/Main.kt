@@ -75,6 +75,17 @@ class LutrineTTS : ListenerAdapter() {
 
     private val ttsHandlers: MutableMap<Guild, TTSHandler> = mutableMapOf()
 
+    private val stopPermittedUsers = mutableListOf<Long>(
+        1169172527516500010,    // King of the Server
+        281251890203852801,     // Fred
+        //211957862786662410,     // Adam
+        1057950952067448832,    // Miki
+        295059292258828289,     // Tony
+        132214703115075585,     // Dylan
+        349002770394644480,     // Alex
+        482603614284546059,     // Derek
+    )
+
     init {
         loadData()
     }
@@ -236,8 +247,12 @@ class LutrineTTS : ListenerAdapter() {
     }
 
     private fun clearQueue(event: SlashCommandInteractionEvent) {
-        ttsHandlers[event.guild!!]?.clearQueue()
-        event.reply("Fine, then.").setEphemeral(true).queue()
+        if (stopPermittedUsers.contains(event.user.idLong)) {
+            ttsHandlers[event.guild!!]?.clearQueue()
+            event.reply("Fine, then.").setEphemeral(true).queue()
+        } else {
+            event.reply("I won't be censored!").queue()
+        }
     }
 }
 
