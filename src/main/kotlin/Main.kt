@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.OnlineStatus
 import net.dv8tion.jda.api.audio.AudioSendHandler
 import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.channel.ChannelType
 import net.dv8tion.jda.api.events.guild.GuildReadyEvent
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent
@@ -89,6 +90,10 @@ class LutrineTTS : ListenerAdapter() {
         482603614284546059,     // Derek
     )
 
+    private val privateMessagePermittedUsers = mutableListOf(
+        295059292258828289,
+    )
+
     init {
         loadData()
     }
@@ -125,6 +130,11 @@ class LutrineTTS : ListenerAdapter() {
     }
 
     override fun onMessageReceived(event: MessageReceivedEvent) {
+
+        if (event.channel.type == ChannelType.PRIVATE) {
+            onPrivateMessageReceived(event)
+            return
+        }
 
         if (!event.guild.audioManager.isConnected)
             return
@@ -167,6 +177,25 @@ class LutrineTTS : ListenerAdapter() {
         }
     }
 
+    private fun onPrivateMessageReceived(event: MessageReceivedEvent) {
+
+        if (!privateMessagePermittedUsers.contains(event.message.author.idLong)) {
+            return
+        }
+
+        val content = event.message.contentDisplay
+        val voice = "echo"
+        val speed = 1.0
+
+        val audio = getAudioResponse(content, voice, speed, true)
+
+        if (audio?.isNotEmpty() == true) {
+            ttsHandlers.values.forEach {
+                it.queue(audio)
+            }
+        }
+    }
+
     private fun joinVoice(event: SlashCommandInteractionEvent) {
         if (event.member?.voiceState?.inAudioChannel() != true) {
             event.reply("Error: You must be in a voice channel.").setEphemeral(true).queue()
@@ -199,12 +228,12 @@ class LutrineTTS : ListenerAdapter() {
         saveData()
     }
 
-    private fun getAudioResponse(text: String, voice: String, speed: Double): ByteArray? {
+    private fun getAudioResponse(text: String, voice: String, speed: Double, hd: Boolean = false): ByteArray? {
         var audio: ByteArray?
         runBlocking {
             audio = openAi.speech(
                 request = SpeechRequest(
-                    model = ModelId("tts-1"),
+                    model = ModelId(if (hd) "tts-1" else "tts-1-hd"),
                     input = text,
                     voice = Voice(voice),
                     responseFormat = SpeechResponseFormat("pcm"),
