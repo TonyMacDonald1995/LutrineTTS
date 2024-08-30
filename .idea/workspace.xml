@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bea8ad57-1d10-4801-a95c-cc468925ac8a" name="Changes" comment="Added checking if VoiceChannel is empty">
+    <list default="true" id="bea8ad57-1d10-4801-a95c-cc468925ac8a" name="Changes" comment="Added support for global TTS with Private Message">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Main.kt" afterDir="false" />
     </list>
@@ -313,7 +313,15 @@
       <option name="project" value="LOCAL" />
       <updated>1722636755943</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="Added support for global TTS with Private Message">
+      <option name="closed" value="true" />
+      <created>1723375096955</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1723375096955</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -338,6 +346,7 @@
     <MESSAGE value="Added speed control support" />
     <MESSAGE value="Added stop command permission" />
     <MESSAGE value="Added checking if VoiceChannel is empty" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added checking if VoiceChannel is empty" />
+    <MESSAGE value="Added support for global TTS with Private Message" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added support for global TTS with Private Message" />
   </component>
 </project>

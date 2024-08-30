@@ -7,6 +7,7 @@ import com.aallam.openai.api.http.Timeout
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
+import com.aallam.openai.client.RetryStrategy
 import com.google.gson.Gson
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.JDABuilder
@@ -52,7 +53,8 @@ fun main() {
 
     val config = OpenAIConfig(
         token = openAiToken,
-        timeout = Timeout(socket = 60.seconds)
+        timeout = Timeout(socket = 60.seconds),
+        retry = RetryStrategy(3, 2.0, 5.seconds)
     )
 
     openAi = OpenAI(config)
@@ -237,7 +239,7 @@ class LutrineTTS : ListenerAdapter() {
                     input = text,
                     voice = Voice(voice),
                     responseFormat = SpeechResponseFormat("pcm"),
-                    speed = speed
+                    speed = speed,
                 )
             )
         }
