@@ -150,7 +150,7 @@ class LutrineTTS : ListenerAdapter() {
         if (speed > 4.0 || speed < 0.25)
             speed = 1.0
 
-        val audio = getAudioResponse(content, voice, speed)
+        val audio = getAudioResponse(content, voice, speed, hd = true)
 
         if (audio?.isNotEmpty() == true) {
             ttsHandlers[event.guild]?.queue(audio)
@@ -235,7 +235,7 @@ class LutrineTTS : ListenerAdapter() {
         runBlocking {
             audio = openAi.speech(
                 request = SpeechRequest(
-                    model = ModelId(if (hd) "tts-1" else "tts-1-hd"),
+                    model = ModelId(if (hd) "gpt-4o-mini-tts" else "tts-1-hd"),
                     input = text,
                     voice = Voice(voice),
                     responseFormat = SpeechResponseFormat("pcm"),
