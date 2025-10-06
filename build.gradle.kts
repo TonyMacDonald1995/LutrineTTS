@@ -8,9 +8,9 @@ plugins {
 group = "com.lutrinecreations"
 version = "1.0-SNAPSHOT"
 
-val jdaVersion = "5.0.1"
+val jdaVersion = "5.6.1"
 val lavaplayerVersion = "2.2.1"
-val openAiKotlinVersion = "3.8.2"
+val openAiKotlinVersion = "4.0.1"
 
 repositories {
     mavenCentral()

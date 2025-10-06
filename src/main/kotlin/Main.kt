@@ -81,21 +81,6 @@ class LutrineTTS : ListenerAdapter() {
 
     private val ttsHandlers: MutableMap<Guild, TTSHandler> = mutableMapOf()
 
-    private val stopPermittedUsers = mutableListOf(
-        1169172527516500010,    // King of the Server
-        281251890203852801,     // Fred
-        211957862786662410,     // Adam
-        1057950952067448832,    // Miki
-        295059292258828289,     // Tony
-        132214703115075585,     // Dylan
-        349002770394644480,     // Alex
-        482603614284546059,     // Derek
-    )
-
-    private val privateMessagePermittedUsers = mutableListOf(
-        295059292258828289,
-    )
-
     init {
         loadData()
     }
@@ -181,10 +166,6 @@ class LutrineTTS : ListenerAdapter() {
 
     private fun onPrivateMessageReceived(event: MessageReceivedEvent) {
 
-        if (!privateMessagePermittedUsers.contains(event.message.author.idLong)) {
-            return
-        }
-
         val content = event.message.contentDisplay
         val voice = "echo"
         val speed = 1.0
@@ -208,7 +189,7 @@ class LutrineTTS : ListenerAdapter() {
 
         val audioManager = event.guild?.audioManager
         audioManager?.sendingHandler = ttsHandlers[event.guild!!]
-        audioManager?.openAudioConnection(event.member?.voiceState?.channel?.asVoiceChannel())
+        audioManager?.openAudioConnection(event.member?.voiceState?.channel?.asVoiceChannel()!!)
         event.reply("Joined ${event.member?.voiceState?.channel?.name}").setEphemeral(true).queue()
     }
 
@@ -289,12 +270,8 @@ class LutrineTTS : ListenerAdapter() {
     }
 
     private fun clearQueue(event: SlashCommandInteractionEvent) {
-        if (stopPermittedUsers.contains(event.user.idLong)) {
-            ttsHandlers[event.guild!!]?.clearQueue()
-            event.reply("Fine, then.").setEphemeral(true).queue()
-        } else {
-            event.reply("I won't be censored!").queue()
-        }
+        ttsHandlers[event.guild!!]?.clearQueue()
+        event.reply("Fine, then.").setEphemeral(true).queue()
     }
 }
 

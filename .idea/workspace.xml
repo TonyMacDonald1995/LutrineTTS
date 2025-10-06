@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="bea8ad57-1d10-4801-a95c-cc468925ac8a" name="Changes" comment="Added support for global TTS with Private Message">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/kotlin/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/Main.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -99,7 +100,7 @@
     ]
   }
 }</component>
-  <component name="RunManager" selected="Gradle.LutrineTTS [jar]">
+  <component name="RunManager" selected="Gradle.LutrineTTS [build]">
     <configuration name="LutrineTTS [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -154,8 +155,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Gradle.LutrineTTS [jar]" />
         <item itemvalue="Gradle.LutrineTTS [build]" />
+        <item itemvalue="Gradle.LutrineTTS [jar]" />
         <item itemvalue="Kotlin.MainKt" />
       </list>
     </recent_temporary>
@@ -321,7 +322,15 @@
       <option name="project" value="LOCAL" />
       <updated>1723375096955</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="Added support for global TTS with Private Message">
+      <option name="closed" value="true" />
+      <created>1724987274867</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1724987274867</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
