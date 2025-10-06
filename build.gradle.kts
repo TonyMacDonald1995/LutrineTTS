@@ -21,8 +21,8 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation("net.dv8tion:JDA:$jdaVersion")
     implementation("com.aallam.openai:openai-client:$openAiKotlinVersion")
-    implementation("com.google.code.gson:gson:2.10.1")
-    runtimeOnly("io.ktor:ktor-client-okhttp:2.3.11")
+    implementation("com.google.code.gson:gson:2.13.2")
+    runtimeOnly("io.ktor:ktor-client-okhttp:3.3.0")
 }
 
 tasks.test {
