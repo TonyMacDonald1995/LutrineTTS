@@ -1,0 +1,14 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%level] %logger{20} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Suppress noisy JDA debug output -->
+    <logger name="net.dv8tion.jda" level="INFO" />
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
