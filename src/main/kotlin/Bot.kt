@@ -124,6 +124,10 @@ class Bot(
             content = content.take(MAX_MESSAGE_LENGTH) + "…"
         }
 
+        // Extract GIF URLs before they get spoken as raw text
+        val gifUrls = GIF_URL_PATTERN.findAll(content).map { it.value }.toList()
+        val textWithoutUrls = GIF_URL_PATTERN.replace(content, "").trim()
+
         val guildId = guild.idLong
         val guildName = guild.name
 
@@ -131,8 +135,23 @@ class Bot(
             val lock = guildTtsLocks.getOrPut(guildId) { Mutex() }
             lock.withLock {
                 try {
+                    // Build the spoken text: original text (minus URLs) + GIF descriptions
+                    val parts = mutableListOf<String>()
+                    if (textWithoutUrls.isNotEmpty()) {
+                        parts.add(textWithoutUrls)
+                    }
+                    for (url in gifUrls) {
+                        val description = ttsService.describeGifUrl(url)
+                        if (description != null) {
+                            parts.add(description)
+                        }
+                    }
+
+                    val spokenText = parts.joinToString(". ")
+                    if (spokenText.isEmpty()) return@withLock
+
                     ttsService.streamSpeech(
-                        text = content,
+                        text = spokenText,
                         voice = prefs.voice,
                         speed = prefs.speed,
                         instructions = prefs.instructions,
@@ -231,6 +250,12 @@ class Bot(
 
     companion object {
         private const val MAX_MESSAGE_LENGTH = 500
+
+        // Matches Tenor and Giphy URLs — these contain descriptive slugs we can infer content from.
+        private val GIF_URL_PATTERN = Regex(
+            """https?://(?:tenor\.com/view|media1?\.tenor\.com|(?:media\.)?giphy\.com/media|i\.giphy\.com)/\S+""",
+            RegexOption.IGNORE_CASE
+        )
 
         val VOICES = listOf(
             "alloy", "ash", "ballad", "coral", "echo", "fable",

@@ -63,6 +63,52 @@ class TtsService(private val apiKey: String) {
         }
     }
 
+    /**
+     * Asks a text model to infer the content of a GIF from its URL alone.
+     *
+     * Tenor/Giphy URLs contain descriptive slugs (e.g. "excited-cat-jumping-happy")
+     * that a language model can interpret without needing vision or image tokens.
+     *
+     * Returns a short spoken description, or null on failure.
+     */
+    suspend fun describeGifUrl(url: String): String? {
+        val body = buildJsonObject {
+            put("model", "gpt-4o-mini")
+            put("max_tokens", 50)
+            putJsonArray("messages") {
+                addJsonObject {
+                    put("role", "user")
+                    put("content", "Please provide your best guess as to the content of this GIF " +
+                            "based on the URL for use with a text-to-speech reader. " +
+                            "Reply with only a brief, natural description — no quotes, no preamble.\n\n$url")
+                }
+            }
+        }
+
+        return try {
+            val response = client.post("https://api.openai.com/v1/chat/completions") {
+                header(HttpHeaders.Authorization, "Bearer $apiKey")
+                contentType(ContentType.Application.Json)
+                setBody(body.toString())
+            }
+
+            if (!response.status.isSuccess()) {
+                logger.warn("GIF describe failed ({}): {}", response.status, response.bodyAsText())
+                return null
+            }
+
+            val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+            json["choices"]?.jsonArray?.firstOrNull()
+                ?.jsonObject?.get("message")
+                ?.jsonObject?.get("content")
+                ?.jsonPrimitive?.content
+                ?.trim()
+        } catch (e: Exception) {
+            logger.warn("Failed to describe GIF URL: {}", url, e)
+            null
+        }
+    }
+
     fun close() {
         client.close()
     }
